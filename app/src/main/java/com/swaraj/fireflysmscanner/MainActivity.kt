@@ -68,6 +68,7 @@ fun MainApp() {
     val setupViewModel: SetupViewModel = viewModel()
     val smsViewModel: SmsViewModel = viewModel()
     val transactionViewModel: TransactionViewModel = viewModel()
+    val fireflyDataViewModel: FireflyDataViewModel = viewModel()
 
     // SMS permission state
     var hasSmsPermission by remember {
@@ -154,7 +155,8 @@ fun MainApp() {
             composable(Screen.Transactions.route) {
                 TransactionScreen(
                     smsViewModel = smsViewModel,
-                    transactionViewModel = transactionViewModel
+                    transactionViewModel = transactionViewModel,
+                    fireflyDataViewModel = fireflyDataViewModel
                 )
             }
 

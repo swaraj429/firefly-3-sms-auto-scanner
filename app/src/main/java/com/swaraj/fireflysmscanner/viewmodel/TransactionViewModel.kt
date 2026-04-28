@@ -39,27 +39,40 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                 val dateStr = dateFormat.format(Date(transaction.timestamp))
 
                 val fireflyType = transaction.effectiveType.toFireflyType()
+                val description = transaction.description.ifBlank {
+                    "SMS Transaction: ${transaction.rawMessage.take(100)}"
+                }
 
-                // Build transaction split
+                // Build transaction split with enriched metadata
                 val split = if (fireflyType == "withdrawal") {
                     FireflyTransactionSplit(
                         type = fireflyType,
-                        description = "SMS Transaction: ${transaction.rawMessage.take(100)}",
+                        description = description,
                         amount = String.format(Locale.US, "%.2f", transaction.effectiveAmount),
-                        sourceId = prefs.accountId,
-                        destinationName = "SMS Expense",
+                        sourceId = transaction.sourceAccountId ?: prefs.accountId,
+                        destinationId = transaction.destinationAccountId,
+                        destinationName = transaction.destinationAccountName
+                            ?: if (transaction.destinationAccountId == null) "SMS Expense" else null,
                         date = dateStr,
-                        notes = "Auto-parsed from SMS:\n${transaction.rawMessage}"
+                        notes = "Auto-parsed from SMS:\n${transaction.rawMessage}",
+                        categoryName = transaction.categoryName,
+                        tags = transaction.selectedTags.ifEmpty { null },
+                        budgetId = transaction.budgetId
                     )
                 } else {
                     FireflyTransactionSplit(
                         type = fireflyType,
-                        description = "SMS Transaction: ${transaction.rawMessage.take(100)}",
+                        description = description,
                         amount = String.format(Locale.US, "%.2f", transaction.effectiveAmount),
-                        sourceName = "SMS Income",
-                        destinationId = prefs.accountId,
+                        sourceId = transaction.sourceAccountId,
+                        sourceName = transaction.sourceAccountName
+                            ?: if (transaction.sourceAccountId == null) "SMS Income" else null,
+                        destinationId = transaction.destinationAccountId ?: prefs.accountId,
                         date = dateStr,
-                        notes = "Auto-parsed from SMS:\n${transaction.rawMessage}"
+                        notes = "Auto-parsed from SMS:\n${transaction.rawMessage}",
+                        categoryName = transaction.categoryName,
+                        tags = transaction.selectedTags.ifEmpty { null },
+                        budgetId = transaction.budgetId
                     )
                 }
 
@@ -67,7 +80,8 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                     transactions = listOf(split)
                 )
 
-                DebugLog.log(TAG, "POST /api/v1/transactions — type=$fireflyType, amount=${transaction.effectiveAmount}")
+                DebugLog.log(TAG, "POST /api/v1/transactions — type=$fireflyType, amount=${transaction.effectiveAmount}" +
+                        ", category=${transaction.categoryName}, tags=${transaction.selectedTags}")
 
                 val response = api.createTransaction(request)
 

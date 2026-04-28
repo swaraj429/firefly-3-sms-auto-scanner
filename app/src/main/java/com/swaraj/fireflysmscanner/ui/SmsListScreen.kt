@@ -13,7 +13,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.swaraj.fireflysmscanner.model.SmsMessage
 import com.swaraj.fireflysmscanner.viewmodel.SmsViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmsListScreen(
     viewModel: SmsViewModel,
@@ -22,6 +25,11 @@ fun SmsListScreen(
     onNavigateToParsed: () -> Unit
 ) {
     var selectedSms by remember { mutableStateOf<SmsMessage?>(null) }
+    val dateFormat = remember { SimpleDateFormat("dd MMM yyyy", Locale.getDefault()) }
+
+    // Date picker states
+    var showFromPicker by remember { mutableStateOf(false) }
+    var showToPicker by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -34,6 +42,100 @@ fun SmsListScreen(
             style = MaterialTheme.typography.headlineMedium
         )
 
+        // Date range selector
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        ) {
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = "📅 Date Range",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // From date
+                    OutlinedCard(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { showFromPicker = true }
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "From",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = dateFormat.format(Date(viewModel.fromDate)),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+
+                    // To date
+                    OutlinedCard(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { showToPicker = true }
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
+                            Text(
+                                text = "To",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = dateFormat.format(Date(viewModel.toDate)),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                }
+
+                // Quick range buttons
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    listOf(
+                        "Today" to 0,
+                        "3 Days" to 3,
+                        "7 Days" to 7,
+                        "30 Days" to 30,
+                        "90 Days" to 90
+                    ).forEach { (label, days) ->
+                        FilterChip(
+                            selected = false,
+                            onClick = {
+                                val cal = Calendar.getInstance()
+                                viewModel.toDate = cal.timeInMillis
+                                if (days == 0) {
+                                    cal.set(Calendar.HOUR_OF_DAY, 0)
+                                    cal.set(Calendar.MINUTE, 0)
+                                    cal.set(Calendar.SECOND, 0)
+                                } else {
+                                    cal.add(Calendar.DAY_OF_YEAR, -days)
+                                }
+                                viewModel.fromDate = cal.timeInMillis
+                            },
+                            label = { Text(label, style = MaterialTheme.typography.labelSmall) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+
         // Action buttons row
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -42,7 +144,7 @@ fun SmsListScreen(
             Button(
                 onClick = {
                     if (hasPermission) {
-                        viewModel.loadSms()
+                        viewModel.loadSmsByDateRange()
                     } else {
                         onRequestPermission()
                     }
@@ -50,7 +152,7 @@ fun SmsListScreen(
                 modifier = Modifier.weight(1f),
                 enabled = !viewModel.isLoading
             ) {
-                Text(if (hasPermission) "📥 Scan Last 50 SMS" else "🔑 Grant SMS Permission")
+                Text(if (hasPermission) "📥 Scan SMS" else "🔑 Grant Permission")
             }
 
             OutlinedButton(
@@ -113,7 +215,7 @@ fun SmsListScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No messages loaded.\nTap 'Scan' or 'Sample Data' to start.",
+                    text = "No messages loaded.\nSelect a date range and tap 'Scan SMS' to start.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -126,6 +228,48 @@ fun SmsListScreen(
                     SmsCard(sms = sms, onClick = { selectedSms = sms })
                 }
             }
+        }
+    }
+
+    // From date picker dialog
+    if (showFromPicker) {
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = viewModel.fromDate
+        )
+        DatePickerDialog(
+            onDismissRequest = { showFromPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { viewModel.fromDate = it }
+                    showFromPicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showFromPicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = pickerState)
+        }
+    }
+
+    // To date picker dialog
+    if (showToPicker) {
+        val pickerState = rememberDatePickerState(
+            initialSelectedDateMillis = viewModel.toDate
+        )
+        DatePickerDialog(
+            onDismissRequest = { showToPicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    pickerState.selectedDateMillis?.let { viewModel.toDate = it }
+                    showToPicker = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showToPicker = false }) { Text("Cancel") }
+            }
+        ) {
+            DatePicker(state = pickerState)
         }
     }
 
