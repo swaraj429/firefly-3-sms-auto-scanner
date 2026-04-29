@@ -9,6 +9,7 @@
 [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4?logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen.svg)](CONTRIBUTING.md)
+[![Website](https://img.shields.io/badge/Website-Live-brightgreen?logo=googlechrome)](https://firefly3smsscanner.swaraj429.com/)
 
 *Stop manually logging every UPI payment, card swipe, and bank transfer.*
 
