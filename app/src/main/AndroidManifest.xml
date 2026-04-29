@@ -2,8 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Existing permissions -->
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Real-time SMS listening -->
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
+    <!-- Notification permission (Android 13+) -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-feature
         android:name="android.hardware.telephony"
@@ -28,5 +35,25 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- SMS BroadcastReceiver for live transaction detection -->
+        <receiver
+            android:name=".notification.SmsReceiver"
+            android:exported="true"
+            android:permission="android.permission.BROADCAST_SMS">
+            <!-- Incoming SMS -->
+            <intent-filter android:priority="999">
+                <action android:name="android.provider.Telephony.SMS_RECEIVED" />
+            </intent-filter>
+            <!-- Notification action: Send Now -->
+            <intent-filter>
+                <action android:name="com.swaraj.fireflysmscanner.ACTION_SEND_NOW" />
+            </intent-filter>
+            <!-- Notification action: Dismiss -->
+            <intent-filter>
+                <action android:name="com.swaraj.fireflysmscanner.ACTION_DISMISS" />
+            </intent-filter>
+        </receiver>
+
     </application>
 </manifest>

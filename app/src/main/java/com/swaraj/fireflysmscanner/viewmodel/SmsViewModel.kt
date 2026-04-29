@@ -85,4 +85,26 @@ class SmsViewModel(application: Application) : AndroidViewModel(application) {
         statusMessage = "Parsed ${results.size}/${smsMessages.size} messages"
         DebugLog.log(TAG, "Parse complete: ${results.size}/${smsMessages.size}")
     }
+
+    /**
+     * Called when the user taps a transaction notification.
+     * Inserts the transaction at the top of the list so it's immediately visible
+     * on the Transactions screen.
+     * Returns true if it was a new transaction (not a duplicate).
+     */
+    fun addTransactionFromNotification(transaction: ParsedTransaction): Boolean {
+        // Avoid duplicates: same timestamp + amount already in list
+        val isDuplicate = parsedTransactions.any {
+            it.timestamp == transaction.timestamp && it.amount == transaction.amount
+        }
+        if (isDuplicate) {
+            DebugLog.log(TAG, "Notification transaction already in list, skipping duplicate")
+            return false
+        }
+        // Prepend so it appears at top
+        parsedTransactions.add(0, transaction)
+        statusMessage = "📩 New transaction from notification"
+        DebugLog.log(TAG, "Added notification transaction: ₹${transaction.effectiveAmount} ${transaction.effectiveType}")
+        return true
+    }
 }

@@ -1,7 +1,9 @@
 package com.swaraj.fireflysmscanner
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -22,13 +24,24 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.swaraj.fireflysmscanner.debug.DebugLog
+import com.swaraj.fireflysmscanner.model.ParsedTransaction
+import com.swaraj.fireflysmscanner.model.TransactionType
+import com.swaraj.fireflysmscanner.notification.NotificationHelper
 import com.swaraj.fireflysmscanner.ui.*
 import com.swaraj.fireflysmscanner.viewmodel.*
 
 class MainActivity : ComponentActivity() {
+
+    // Holds a pending transaction from a notification tap.
+    // Written on the main thread from onCreate/onNewIntent, read in Compose.
+    private val pendingNotificationTransaction = mutableStateOf<ParsedTransaction?>(null)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         DebugLog.log("MainActivity", "onCreate")
+
+        // Handle notification tap intent that launched the activity
+        handleNotificationIntent(intent)
 
         setContent {
             MaterialTheme(
@@ -38,16 +51,50 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainApp()
+                    MainApp(
+                        pendingNotificationTransaction = pendingNotificationTransaction
+                    )
                 }
             }
         }
+    }
+
+    /** Called when the activity is already running and a new intent arrives (e.g. second notification tap). */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleNotificationIntent(intent)
+    }
+
+    private fun handleNotificationIntent(intent: Intent?) {
+        if (intent?.action != NotificationHelper.ACTION_REVIEW_TRANSACTION) return
+
+        val amount = intent.getDoubleExtra(NotificationHelper.EXTRA_AMOUNT, 0.0)
+        val typeStr = intent.getStringExtra(NotificationHelper.EXTRA_TYPE) ?: "UNKNOWN"
+        val sender = intent.getStringExtra(NotificationHelper.EXTRA_SENDER) ?: ""
+        val rawMessage = intent.getStringExtra(NotificationHelper.EXTRA_RAW_MESSAGE) ?: ""
+        val timestamp = intent.getLongExtra(NotificationHelper.EXTRA_TIMESTAMP, System.currentTimeMillis())
+
+        val type = try {
+            TransactionType.valueOf(typeStr)
+        } catch (e: Exception) {
+            TransactionType.UNKNOWN
+        }
+
+        pendingNotificationTransaction.value = ParsedTransaction(
+            amount = amount,
+            type = type,
+            rawMessage = rawMessage,
+            sender = sender,
+            timestamp = timestamp,
+            description = "SMS: ${rawMessage.take(60)}"
+        )
+
+        DebugLog.log("MainActivity", "Notification tap → ₹$amount $type from $sender")
     }
 }
 
 @Composable
 private fun dynamicColorSchemeOrDefault(): ColorScheme {
-    // Use default Material3 light scheme — works everywhere
     return MaterialTheme.colorScheme
 }
 
@@ -60,29 +107,39 @@ sealed class Screen(val route: String, val title: String, val icon: @Composable 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainApp() {
+fun MainApp(
+    pendingNotificationTransaction: MutableState<ParsedTransaction?> = mutableStateOf(null)
+) {
     val navController = rememberNavController()
     val context = LocalContext.current
 
-    // Shared ViewModels (scoped to activity via viewModel())
+    // Shared ViewModels
     val setupViewModel: SetupViewModel = viewModel()
     val smsViewModel: SmsViewModel = viewModel()
     val transactionViewModel: TransactionViewModel = viewModel()
     val fireflyDataViewModel: FireflyDataViewModel = viewModel()
 
-    // SMS permission state
+    // SMS permissions (READ + RECEIVE)
     var hasSmsPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(context, Manifest.permission.READ_SMS) ==
                     PackageManager.PERMISSION_GRANTED
         )
     }
+    var hasReceiveSmsPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECEIVE_SMS) ==
+                    PackageManager.PERMISSION_GRANTED
+        )
+    }
 
+    // Request READ_SMS + RECEIVE_SMS together
     val permissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { granted ->
-        hasSmsPermission = granted
-        if (granted) {
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { results ->
+        hasSmsPermission = results[Manifest.permission.READ_SMS] == true
+        hasReceiveSmsPermission = results[Manifest.permission.RECEIVE_SMS] == true
+        if (hasSmsPermission) {
             DebugLog.log("Permission", "READ_SMS granted ✓")
             Toast.makeText(context, "SMS permission granted!", Toast.LENGTH_SHORT).show()
             smsViewModel.loadSms()
@@ -90,7 +147,45 @@ fun MainApp() {
             DebugLog.log("Permission", "READ_SMS denied ✗")
             Toast.makeText(context, "SMS permission denied. Use sample data.", Toast.LENGTH_LONG).show()
         }
+        if (hasReceiveSmsPermission) {
+            DebugLog.log("Permission", "RECEIVE_SMS granted ✓ — live SMS detection active")
+        }
     }
+
+    // Request POST_NOTIFICATIONS on Android 13+
+    val notifPermLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        DebugLog.log("Permission", "POST_NOTIFICATIONS: ${if (granted) "granted ✓" else "denied ✗"}")
+    }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.POST_NOTIFICATIONS
+                ) != PackageManager.PERMISSION_GRANTED
+            ) {
+                notifPermLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            }
+        }
+    }
+
+    // ── Handle notification tap ───────────────────────────────────────────────
+    // When a pending transaction arrives (from tapping a notification),
+    // add it to the list and navigate to the Transactions tab.
+    LaunchedEffect(pendingNotificationTransaction.value) {
+        val tx = pendingNotificationTransaction.value ?: return@LaunchedEffect
+        pendingNotificationTransaction.value = null  // consume it
+
+        smsViewModel.addTransactionFromNotification(tx)
+
+        // Navigate to Transactions tab
+        navController.navigate(Screen.Transactions.route) {
+            popUpTo(navController.graph.startDestinationId) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
 
     val screens = listOf(Screen.Setup, Screen.SmsList, Screen.Transactions, Screen.Debug)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -144,7 +239,12 @@ fun MainApp() {
                     viewModel = smsViewModel,
                     hasPermission = hasSmsPermission,
                     onRequestPermission = {
-                        permissionLauncher.launch(Manifest.permission.READ_SMS)
+                        permissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.READ_SMS,
+                                Manifest.permission.RECEIVE_SMS
+                            )
+                        )
                     },
                     onNavigateToParsed = {
                         navController.navigate(Screen.Transactions.route)
