@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firefly III SMS Scanner — Auto-log transactions from SMS to Firefly III</title>
+  <meta name="description"
+    content="Open-source Android app that automatically detects bank transaction SMS and logs them to your self-hosted Firefly III instance. No cloud, no tracking, 100% private.">
+  <meta name="keywords"
+    content="Firefly III, SMS scanner, personal finance, Android, open source, self-hosted, budget tracker, UPI, transaction logging">
+  <meta name="author" content="Swaraj Deogaonkar">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://swaraj429.github.io/firefly-3-sms-auto-scanner/">
+  <meta property="og:title" content="Firefly III SMS Scanner — Auto-log bank SMS to Firefly III">
+  <meta property="og:description"
+    content="Open-source Android app that auto-detects transaction SMS and sends them to your Firefly III instance with one tap.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://swaraj429.github.io/firefly-3-sms-auto-scanner/">
+  <meta property="og:image" content="assets/images/app-icon.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="assets/images/app-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar" id="navbar">
+    <div class="container">
+      <a href="#" class="nav-brand">
+        <img src="assets/images/app-icon.png" alt="Firefly SMS Scanner Icon" width="36" height="36">
+        Firefly<span>SMS</span> Scanner
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#how-it-works">How It Works</a></li>
+        <li><a href="#screenshots">Screenshots</a></li>
+        <li><a href="#architecture">Tech Stack</a></li>
+        <li><a href="#roadmap">Roadmap</a></li>
+        <li><a href="#privacy">Privacy</a></li>
+        <li><a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner" class="nav-cta" target="_blank"
+            rel="noopener">⭐ Star on GitHub</a></li>
+      </ul>
+      <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle menu">☰</button>
+    </div>
+  </nav>
+
+  <!-- ===== HERO ===== -->
+  <section class="hero" id="hero">
+    <div class="container">
+      <div class="hero-content">
+        <div class="hero-text">
+          <div class="hero-badge"><span class="pulse"></span> Open Source &bull; MIT Licensed</div>
+          <h1>Stop Manually Logging Every <span class="gradient-text">Bank Transaction</span></h1>
+          <p class="hero-desc">An open-source Android app that detects transaction SMS in real-time and sends them to
+            your self-hosted Firefly III — with one tap. No cloud. No tracking. 100% yours.</p>
+          <div class="hero-actions">
+            <a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner/releases" class="btn btn-primary"
+              id="download-btn">📥 Download APK</a>
+            <a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner" class="btn btn-secondary" target="_blank"
+              rel="noopener">View Source Code →</a>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <h3 data-count="5" data-suffix="+">0</h3>
+              <p>App Screens</p>
+            </div>
+            <div class="hero-stat">
+              <h3 data-count="30" data-suffix="+">0</h3>
+              <p>Bank Formats</p>
+            </div>
+            <div class="hero-stat">
+              <h3 data-count="100" data-suffix="%">0</h3>
+              <p>Private & Local</p>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="phone-mockup">
+            <img src="assets/images/Setup_screen.jpg" alt="Firefly SMS Scanner Setup Screen" width="260" height="520"
+              loading="eager">
+            <div class="phone-glow"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">✨ Features</span>
+        <h2 class="section-title">Everything You Need for <span class="gradient-text">Effortless Finance Tracking</span>
+        </h2>
+        <p class="section-subtitle mx-auto">From real-time SMS detection to a full transaction editor — built for the
+          Firefly III community.</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card reveal">
+          <div class="feature-icon">📩</div>
+          <h3>Real-Time SMS Detection</h3>
+          <p>Runs silently in the background. The moment a transaction SMS arrives, you get an actionable notification —
+            tap to send to Firefly or review first.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">📅</div>
+          <h3>Date-Range SMS Scanning</h3>
+          <p>Scan your entire inbox for any date range with quick-select chips: Today, 3 Days, 7 Days, 30 Days, 90 Days,
+            or use the full Material3 date picker.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">🏦</div>
+          <h3>Abacus-Style Transaction Editor</h3>
+          <p>Before submitting, enrich each transaction with category, budget, source/destination accounts, tags, and
+            editable description — all fetched from your Firefly instance.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">🔄</div>
+          <h3>Firefly III Metadata Sync</h3>
+          <p>One-tap sync of categories, tags, budgets, and accounts. Cached in-session so there are no repeated API
+            calls while you review transactions.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">🔔</div>
+          <h3>Smart Notifications</h3>
+          <p>Heads-up notifications with "⚡ Send to Firefly" and "Review & Edit" actions. Submit transactions without
+            even opening the app.</p>
+        </div>
+        <div class="feature-card reveal">
+          <div class="feature-icon">🐛</div>
+          <h3>Built-in Debug Log</h3>
+          <p>Timestamped in-app log of every API call, SMS read, and parse decision. Export as plain text for easy issue
+            reporting.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== HOW IT WORKS ===== -->
+  <section class="section" id="how-it-works" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">🚀 How It Works</span>
+        <h2 class="section-title">Up and Running in <span class="gradient-text">4 Simple Steps</span></h2>
+        <p class="section-subtitle mx-auto">Connect to your Firefly III instance and start logging transactions
+          automatically.</p>
+      </div>
+      <div class="steps-container">
+        <div class="step-card reveal">
+          <div class="step-number">1</div>
+          <h3>Install the App</h3>
+          <p>Download the APK from GitHub Releases or build from source in Android Studio.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-number">2</div>
+          <h3>Connect to Firefly III</h3>
+          <p>Enter your Firefly III base URL and Personal Access Token. Tap "Test Connection" to verify.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-number">3</div>
+          <h3>Grant Permissions</h3>
+          <p>Allow READ_SMS, RECEIVE_SMS, and POST_NOTIFICATIONS so the app can detect and alert you.</p>
+        </div>
+        <div class="step-card reveal">
+          <div class="step-number">4</div>
+          <h3>Start Tracking!</h3>
+          <p>Scan existing SMS or let the background receiver catch new ones. Review, edit, and send to Firefly.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== SCREENSHOTS ===== -->
+  <section class="section" id="screenshots">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">📸 Screenshots</span>
+        <h2 class="section-title">See It <span class="gradient-text">In Action</span></h2>
+        <p class="section-subtitle mx-auto">Built with Jetpack Compose and Material3 for a modern, native Android
+          experience.</p>
+      </div>
+      <div class="screenshots-track reveal">
+        <div class="screenshot-item">
+          <img src="assets/images/Setup_screen.jpg" alt="Setup screen for configuring Firefly III connection"
+            width="260" height="520" loading="lazy">
+          <div class="screenshot-label">Setup Screen</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="assets/images/SMS_scanner.jpg" alt="SMS scanner with date range picker" width="260" height="520"
+            loading="lazy">
+          <div class="screenshot-label">SMS Scanner</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="assets/images/Trasaction_editor.jpg" alt="Transaction editor with categories and tags" width="260"
+            height="520" loading="lazy">
+          <div class="screenshot-label">Transaction Editor</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="assets/images/Notification_alert.jpg" alt="Notification alert for detected transaction" width="260"
+            height="520" loading="lazy">
+          <div class="screenshot-label">Notification Alert</div>
+        </div>
+        <div class="screenshot-item">
+          <img src="assets/images/Send_result.jpg" alt="Send result confirmation screen" width="260" height="520"
+            loading="lazy">
+          <div class="screenshot-label">Send Result</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== TECH STACK / ARCHITECTURE ===== -->
+  <section class="section" id="architecture" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">🏗️ Tech Stack</span>
+        <h2 class="section-title">Built With <span class="gradient-text">Modern Android Tech</span></h2>
+        <p class="section-subtitle mx-auto">Clean architecture, minimal dependencies, and built for contributors.</p>
+      </div>
+      <div class="arch-grid reveal">
+        <div class="arch-card tech-item">
+          <div class="icon">🟣</div>
+          <h4>Kotlin</h4>
+          <p>Primary language with coroutines for async</p>
+        </div>
+        <div class="arch-card tech-item">
+          <div class="icon">🎨</div>
+          <h4>Jetpack Compose</h4>
+          <p>Declarative UI with Material3</p>
+        </div>
+        <div class="arch-card tech-item">
+          <div class="icon">🌐</div>
+          <h4>Retrofit 2</h4>
+          <p>Type-safe Firefly III API calls</p>
+        </div>
+        <div class="arch-card tech-item">
+          <div class="icon">🔒</div>
+          <h4>OkHttp 4</h4>
+          <p>HTTP client with auth interceptor</p>
+        </div>
+        <div class="arch-card tech-item">
+          <div class="icon">🧭</div>
+          <h4>Navigation Compose</h4>
+          <p>Screen routing & deep links</p>
+        </div>
+        <div class="arch-card tech-item">
+          <div class="icon">📦</div>
+          <h4>ViewModel</h4>
+          <p>Lifecycle-aware state management</p>
+        </div>
+        <div class="arch-card tech-item">
+          <div class="icon">📡</div>
+          <h4>BroadcastReceiver</h4>
+          <p>Live SMS interception</p>
+        </div>
+        <div class="arch-card tech-item">
+          <div class="icon">🔧</div>
+          <h4>SharedPreferences</h4>
+          <p>Lightweight settings persistence</p>
+        </div>
+      </div>
+      <!-- Install command -->
+      <div class="reveal" style="margin-top: 48px; text-align: center;">
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 12px;">Clone and build from source:</p>
+        <div
+          style="display: inline-flex; align-items: center; gap: 12px; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 14px 24px; font-family: var(--font-mono); font-size: 0.9rem;">
+          <code>git clone https://github.com/swaraj429/firefly-3-sms-auto-scanner.git</code>
+          <button class="copy-btn" data-copy="git clone https://github.com/swaraj429/firefly-3-sms-auto-scanner.git"
+            style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1rem;"
+            aria-label="Copy command">📋</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== ROADMAP ===== -->
+  <section class="section" id="roadmap">
+    <div class="container">
+      <div class="reveal">
+        <span class="section-label">🗺️ Roadmap</span>
+        <h2 class="section-title">Where We're <span class="gradient-text">Headed</span></h2>
+        <p class="section-subtitle">Help us build the future of open-source personal finance automation.</p>
+      </div>
+      <div class="roadmap-timeline reveal">
+        <div class="roadmap-item done">
+          <span class="roadmap-tag done">✅ Done</span>
+          <h4>v0.0.1-alpha — Initial Release</h4>
+          <p>Real-time SMS detection, basic parsing, notification actions, Firefly III API integration, and setup UI.
+          </p>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-tag current">🔥 In Progress</span>
+          <h4>v1.0 — Stable Release + Signed APK</h4>
+          <p>Production-quality signed APK, better error handling, comprehensive bank format coverage.</p>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-tag upcoming">🔮 Planned</span>
+          <h4>Auto-Send Mode</h4>
+          <p>Skip review — automatically submit all detected transactions to Firefly III instantly.</p>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-tag upcoming">🔮 Planned</span>
+          <h4>Rule-Based Auto-Categorisation</h4>
+          <p>Create rules like "SWIGGY → Food & Dining" to auto-assign categories and budgets.</p>
+        </div>
+        <div class="roadmap-item">
+          <span class="roadmap-tag upcoming">🔮 Planned</span>
+          <h4>Multi-Account & International Support</h4>
+          <p>Multiple Firefly III accounts, EU/US bank SMS formats, CSV import, and a spending widget.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PRIVACY ===== -->
+  <section class="section" id="privacy" style="background: var(--bg-secondary);">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">🔐 Privacy & Security</span>
+        <h2 class="section-title">Your Data Stays <span class="gradient-text">On Your Device</span></h2>
+        <p class="section-subtitle mx-auto">We believe personal finance data should remain personal. Period.</p>
+      </div>
+      <div class="privacy-grid">
+        <div class="privacy-card reveal">
+          <div class="icon">🏠</div>
+          <div>
+            <h4>100% Local Processing</h4>
+            <p>SMS content is parsed entirely on your device. Nothing leaves your phone except to YOUR Firefly III
+              instance.</p>
+          </div>
+        </div>
+        <div class="privacy-card reveal">
+          <div class="icon">🚫</div>
+          <div>
+            <h4>Zero Tracking</h4>
+            <p>No analytics, no crash reporting, no third-party SDKs. No data collection of any kind.</p>
+          </div>
+        </div>
+        <div class="privacy-card reveal">
+          <div class="icon">🔓</div>
+          <div>
+            <h4>Fully Open Source</h4>
+            <p>Every line of code is on GitHub. Audit it yourself. MIT licensed — fork it, modify it, own it.</p>
+          </div>
+        </div>
+        <div class="privacy-card reveal">
+          <div class="icon">🏦</div>
+          <div>
+            <h4>Self-Hosted Only</h4>
+            <p>Connects exclusively to your self-hosted Firefly III. No intermediary servers. Your infrastructure, your
+              rules.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FAQ ===== -->
+  <section class="section" id="faq">
+    <div class="container" style="max-width: 760px;">
+      <div class="text-center reveal">
+        <span class="section-label">❓ FAQ</span>
+        <h2 class="section-title">Frequently Asked <span class="gradient-text">Questions</span></h2>
+      </div>
+      <div class="reveal" style="margin-top: 40px;">
+        <div class="faq-item open">
+          <button class="faq-question">What is Firefly III?</button>
+          <div class="faq-answer">
+            <p>Firefly III is a free, open-source, self-hosted personal finance manager. It lets you track transactions,
+              budgets, and accounts on your own server. This app acts as a bridge between your bank SMS and Firefly III.
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">Which banks are supported?</button>
+          <div class="faq-answer">
+            <p>Currently, the parser supports most Indian banking formats (SBI, HDFC, ICICI, Axis, Kotak, and more). The
+              regex-based parser catches common patterns like "debited Rs.X" and "credited INR X". Adding new bank
+              formats is the easiest way to contribute!</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">Does this work on iPhone / iOS?</button>
+          <div class="faq-answer">
+            <p>No — iOS does not allow apps to read SMS messages for privacy reasons. This app is Android-only (8.0+).
+            </p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">Will my bank data be safe?</button>
+          <div class="faq-answer">
+            <p>Yes. All SMS processing happens locally on your device. The app only communicates with YOUR self-hosted
+              Firefly III instance. No third-party servers are involved. The source code is fully open for audit.</p>
+          </div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question">How can I contribute?</button>
+          <div class="faq-answer">
+            <p>The most impactful contribution is adding new bank SMS patterns. You can also fix bugs, improve UI, add
+              documentation, or suggest features. Check our CONTRIBUTING.md guide on GitHub for detailed instructions.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== CONTRIBUTE CTA ===== -->
+  <section class="section" id="contribute">
+    <div class="container">
+      <div class="cta-section reveal">
+        <span class="section-label">🤝 Join Us</span>
+        <h2>Help Build the Future of <span class="gradient-text">Open-Source Finance</span></h2>
+        <p>Whether you're adding a new bank SMS format, fixing a bug, or improving documentation — every contribution
+          matters. Let's make personal finance automation accessible to everyone.</p>
+        <div class="cta-actions">
+          <a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner" class="btn btn-primary" target="_blank"
+            rel="noopener">⭐ Star on GitHub</a>
+          <a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner/fork" class="btn btn-secondary"
+            target="_blank" rel="noopener">🍴 Fork the Repo</a>
+          <a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner/issues" class="btn btn-secondary"
+            target="_blank" rel="noopener">🐛 Report an Issue</a>
+        </div>
+        <div class="contrib-stats">
+          <div class="contrib-stat">
+            <h3>MIT</h3>
+            <p>License</p>
+          </div>
+          <div class="contrib-stat">
+            <h3>Kotlin</h3>
+            <p>Language</p>
+          </div>
+          <div class="contrib-stat">
+            <h3>Android 8+</h3>
+            <p>Minimum SDK</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer" id="footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="nav-brand">
+            <img src="assets/images/app-icon.png" alt="Firefly SMS Scanner" width="36" height="36">
+            Firefly<span>SMS</span>
+          </a>
+          <p>Open-source Android app for automatic personal finance tracking with Firefly III. Built with ❤️ for the
+            self-hosted community.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Project</h4>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#screenshots">Screenshots</a></li>
+            <li><a href="#roadmap">Roadmap</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Resources</h4>
+          <ul>
+            <li><a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner" target="_blank" rel="noopener">GitHub
+                Repo</a></li>
+            <li><a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner/blob/main/CONTRIBUTING.md"
+                target="_blank" rel="noopener">Contributing Guide</a></li>
+            <li><a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner/releases" target="_blank"
+                rel="noopener">Releases</a></li>
+            <li><a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner/issues" target="_blank"
+                rel="noopener">Issues</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Ecosystem</h4>
+          <ul>
+            <li><a href="https://www.firefly-iii.org/" target="_blank" rel="noopener">Firefly III</a></li>
+            <li><a href="https://docs.firefly-iii.org/how-to/firefly-iii/api/" target="_blank" rel="noopener">Firefly
+                III API Docs</a></li>
+            <li><a href="https://github.com/firefly-iii" target="_blank" rel="noopener">Firefly III GitHub</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Swaraj Deogaonkar. MIT License.</p>
+        <div class="footer-bottom-links">
+          <a href="https://github.com/swaraj429/firefly-3-sms-auto-scanner/blob/main/LICENSE" target="_blank"
+            rel="noopener">License</a>
+          <a href="https://github.com/swaraj429" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- FAQ Styles (inline to keep single-file simplicity) -->
+  <style>
+    .faq-item {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: all var(--transition);
+    }
+
+    .faq-item:hover {
+      border-color: rgba(245, 158, 11, 0.3);
+    }
+
+    .faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 20px 24px;
+      background: var(--gradient-card);
+      border: none;
+      color: var(--text-primary);
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: var(--font);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .faq-question::after {
+      content: '+';
+      font-size: 1.4rem;
+      color: var(--accent);
+      transition: transform var(--transition);
+      flex-shrink: 0;
+      margin-left: 16px;
+    }
+
+    .faq-item.open .faq-question::after {
+      content: '−';
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s ease, padding 0.4s ease;
+    }
+
+    .faq-item.open .faq-answer {
+      max-height: 300px;
+    }
+
+    .faq-answer p {
+      padding: 0 24px 20px;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      line-height: 1.7;
+    }
+  </style>
+
+  <!-- JSON-LD Structured Data for SEO -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Firefly III SMS Scanner",
+    "operatingSystem": "Android 8.0+",
+    "applicationCategory": "FinanceApplication",
+    "description": "Open-source Android app that automatically detects bank transaction SMS and logs them to your self-hosted Firefly III instance.",
+    "license": "https://opensource.org/licenses/MIT",
+    "author": {
+      "@type": "Person",
+      "name": "Swaraj Deogaonkar",
+      "url": "https://github.com/swaraj429"
+    },
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "url": "https://github.com/swaraj429/firefly-3-sms-auto-scanner",
+    "downloadUrl": "https://github.com/swaraj429/firefly-3-sms-auto-scanner/releases",
+    "softwareVersion": "0.0.1-alpha"
+  }
+  </script>
+
+  <script src="script.js"></script>
+</body>
+
+</html>
