@@ -18,15 +18,14 @@
 
 ## 📸 Screenshots
 
-> **Note for contributor:** Add screenshots in this order.
 
 | Setup Screen | SMS Scanner | Transaction Editor |
 |:---:|:---:|:---:|
-| *[Add screenshot: Setup screen showing connection form + Live Detection Active card]* | *[Add screenshot: SMS tab with date range picker and scanned messages]* | *[Add screenshot: Transaction card with category/budget/tag dropdowns open]* |
+| <img src="docs/ScreenShots/Setup_screen.jpg" width="250" alt="Setup Screen"> | <img src="docs/ScreenShots/SMS_scanner.jpg" width="250" alt="SMS Scanner"> | <img src="docs/ScreenShots/Trasaction_editor.jpg" width="250" alt="Transaction Editor"> |
 
 | Notification Alert | Send Result |
 |:---:|:---:|
-| *[Add screenshot: Transaction notification with "⚡ Send to Firefly" button]* | *[Add screenshot: Success notification after auto-send]* |
+| <img src="docs/ScreenShots/Notification_alert.jpg" width="250" alt="Notification Alert"> | <img src="docs/ScreenShots/Send_result.jpg" width="250" alt="Send Result"> |
 
 ---
 
