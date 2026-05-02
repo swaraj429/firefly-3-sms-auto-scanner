@@ -42,13 +42,14 @@ fun SmsScreen(
     var showFromPicker by remember { mutableStateOf(false) }
     var showToPicker by remember { mutableStateOf(false) }
 
-    val filters = listOf("All", "Debits", "Credits", "UPI")
+    val filters = listOf("All", "Expenses", "Income", "Transfers", "UPI")
     val ranges = listOf("Today" to 0, "3 Days" to 3, "7 Days" to 7, "30 Days" to 30, "90 Days" to 90)
 
     val filteredMessages = viewModel.smsMessages.filter { sms ->
         when (selectedFilter) {
-            "Debits" -> SmsCardInfo.extract(sms).type == TransactionType.DEBIT
-            "Credits" -> SmsCardInfo.extract(sms).type == TransactionType.CREDIT
+            "Expenses" -> SmsCardInfo.extract(sms).type == TransactionType.WITHDRAWAL
+            "Income" -> SmsCardInfo.extract(sms).type == TransactionType.DEPOSIT
+            "Transfers" -> SmsCardInfo.extract(sms).type == TransactionType.TRANSFER
             "UPI" -> sms.body.lowercase().contains("upi")
             else -> true
         }

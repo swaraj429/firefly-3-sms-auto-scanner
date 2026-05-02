@@ -48,9 +48,14 @@ fun TransactionCard(
         label = "card_scale"
     )
 
-    val isDebit = transaction.effectiveType == TransactionType.DEBIT
+    val isExpense = transaction.isExpense
+    val isTransfer = transaction.effectiveType == TransactionType.TRANSFER
     val amountColor by animateColorAsState(
-        targetValue = if (isDebit) DebitRed else CreditGreen,
+        targetValue = when {
+            isTransfer -> Primary
+            isExpense -> DebitRed
+            else -> CreditGreen
+        },
         animationSpec = tween(200),
         label = "amount_color"
     )
@@ -82,15 +87,22 @@ fun TransactionCard(
                     .size(44.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(
-                        if (isDebit) DebitRedContainer
-                        else CreditGreenContainer
+                        when {
+                            isTransfer -> Primary.copy(alpha = 0.15f)
+                            isExpense -> DebitRedContainer
+                            else -> CreditGreenContainer
+                        }
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (isDebit) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                    imageVector = when {
+                        isTransfer -> Icons.Outlined.SwapHoriz
+                        isExpense -> Icons.Outlined.ArrowUpward
+                        else -> Icons.Outlined.ArrowDownward
+                    },
                     contentDescription = null,
-                    tint = if (isDebit) DebitRed else CreditGreen,
+                    tint = amountColor,
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -112,7 +124,7 @@ fun TransactionCard(
                 Spacer(Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     // Account badge
-                    val accountName = if (isDebit) {
+                    val accountName = if (isExpense) {
                         transaction.sourceAccountName
                     } else {
                         transaction.destinationAccountName
@@ -150,7 +162,7 @@ fun TransactionCard(
             // Amount + status
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = "${if (isDebit) "-" else "+"}${formatCurrency(transaction.effectiveAmount)}",
+                    text = "${when { isTransfer -> "↔"; isExpense -> "-"; else -> "+" }}${formatCurrency(transaction.effectiveAmount)}",
                     style = AmountSmallStyle,
                     fontWeight = FontWeight.Bold,
                     color = amountColor

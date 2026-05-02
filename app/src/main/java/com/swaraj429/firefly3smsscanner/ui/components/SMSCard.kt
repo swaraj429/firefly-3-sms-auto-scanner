@@ -48,8 +48,12 @@ fun SMSCard(
         SmsCardInfo.extract(sms)
     }
 
-    val isDebit = parsedInfo.type == TransactionType.DEBIT
-    val amountColor = if (isDebit) DebitRed else CreditGreen
+    val isExpense = parsedInfo.type == TransactionType.WITHDRAWAL
+    val amountColor = when (parsedInfo.type) {
+        TransactionType.TRANSFER -> Primary
+        TransactionType.WITHDRAWAL -> DebitRed
+        else -> CreditGreen
+    }
 
     Card(
         modifier = modifier
@@ -122,11 +126,15 @@ fun SMSCard(
                     )
                     // Type chip
                     Surface(
-                        color = if (isDebit) DebitRedContainer else CreditGreenContainer,
+                        color = when (parsedInfo.type) {
+                            TransactionType.TRANSFER -> Primary.copy(alpha = 0.15f)
+                            TransactionType.WITHDRAWAL -> DebitRedContainer
+                            else -> CreditGreenContainer
+                        },
                         shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
-                            text = if (isDebit) "DEBIT" else "CREDIT",
+                            text = parsedInfo.type.displayLabel().uppercase(),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
                             color = amountColor,
@@ -219,10 +227,10 @@ data class SmsCardInfo(
             val lowerBody = body.lowercase()
             val type = when {
                 listOf("debited", "deducted", "withdrawn", "sent", "paid", "spent", "purchase").any { lowerBody.contains(it) } ->
-                    TransactionType.DEBIT
+                    TransactionType.WITHDRAWAL
                 listOf("credited", "received", "deposited", "refund", "cashback").any { lowerBody.contains(it) } ->
-                    TransactionType.CREDIT
-                else -> TransactionType.UNKNOWN
+                    TransactionType.DEPOSIT
+                else -> TransactionType.WITHDRAWAL
             }
 
             val accountMatch = accountPattern.find(body)

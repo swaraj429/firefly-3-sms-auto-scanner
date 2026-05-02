@@ -24,7 +24,7 @@ object NotificationHelper {
 
     // Extras keys
     const val EXTRA_AMOUNT = "extra_amount"
-    const val EXTRA_TYPE = "extra_type"       // "DEBIT" | "CREDIT" | "UNKNOWN"
+    const val EXTRA_TYPE = "extra_type"       // "WITHDRAWAL" | "DEPOSIT" | "TRANSFER"
     const val EXTRA_SENDER = "extra_sender"
     const val EXTRA_RAW_MESSAGE = "extra_raw_message"
     const val EXTRA_TIMESTAMP = "extra_timestamp"
@@ -51,16 +51,8 @@ object NotificationHelper {
         transaction: ParsedTransaction,
         notificationId: Int
     ) {
-        val typeEmoji = when (transaction.effectiveType) {
-            TransactionType.DEBIT -> "🔴"
-            TransactionType.CREDIT -> "🟢"
-            TransactionType.UNKNOWN -> "⚪"
-        }
-        val typeLabel = when (transaction.effectiveType) {
-            TransactionType.DEBIT -> "Debit"
-            TransactionType.CREDIT -> "Credit"
-            TransactionType.UNKNOWN -> "Transaction"
-        }
+        val typeEmoji = transaction.effectiveType.emoji()
+        val typeLabel = transaction.effectiveType.displayLabel()
 
         val amountStr = "₹%.2f".format(transaction.effectiveAmount)
         val title = "$typeEmoji $typeLabel Detected — $amountStr"

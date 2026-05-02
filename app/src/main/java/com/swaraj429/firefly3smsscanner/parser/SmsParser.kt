@@ -98,8 +98,8 @@ object SmsParser {
         val hasCredit = creditKeywords.any { lowerBody.contains(it) }
 
         return when {
-            hasDebit && !hasCredit -> TransactionType.DEBIT
-            hasCredit && !hasDebit -> TransactionType.CREDIT
+            hasDebit && !hasCredit -> TransactionType.WITHDRAWAL
+            hasCredit && !hasDebit -> TransactionType.DEPOSIT
             hasDebit && hasCredit -> {
                 // Both present — use position (first keyword wins)
                 val debitPos = debitKeywords.mapNotNull {
@@ -112,9 +112,9 @@ object SmsParser {
                     if (idx >= 0) idx else null
                 }.minOrNull() ?: Int.MAX_VALUE
 
-                if (debitPos < creditPos) TransactionType.DEBIT else TransactionType.CREDIT
+                if (debitPos < creditPos) TransactionType.WITHDRAWAL else TransactionType.DEPOSIT
             }
-            else -> TransactionType.UNKNOWN
+            else -> TransactionType.WITHDRAWAL  // default to expense
         }
     }
 

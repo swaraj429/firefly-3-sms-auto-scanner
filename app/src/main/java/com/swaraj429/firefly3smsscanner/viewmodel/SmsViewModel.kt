@@ -84,10 +84,10 @@ class SmsViewModel(application: Application) : AndroidViewModel(application) {
             val match = matcher.findBestMatch(txn.rawMessage, accounts)
             if (match != null) {
                 // Determine source or destination based on transaction type
-                if (txn.effectiveType == com.swaraj429.firefly3smsscanner.model.TransactionType.DEBIT) {
+                if (txn.effectiveType == com.swaraj429.firefly3smsscanner.model.TransactionType.WITHDRAWAL) {
                     txn.sourceAccountId = match.account.id
                     txn.sourceAccountName = match.account.name
-                } else if (txn.effectiveType == com.swaraj429.firefly3smsscanner.model.TransactionType.CREDIT) {
+                } else if (txn.effectiveType == com.swaraj429.firefly3smsscanner.model.TransactionType.DEPOSIT) {
                     txn.destinationAccountId = match.account.id
                     txn.destinationAccountName = match.account.name
                 }

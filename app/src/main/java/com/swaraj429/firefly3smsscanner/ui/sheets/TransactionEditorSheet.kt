@@ -65,9 +65,14 @@ fun TransactionEditorSheet(
     var showTagPicker by remember { mutableStateOf(false) }
     var showBudgetPicker by remember { mutableStateOf(false) }
 
-    val isDebit = editType == TransactionType.DEBIT
+    val isExpense = editType == TransactionType.WITHDRAWAL
+    val isTransfer = editType == TransactionType.TRANSFER
     val amountColor by animateColorAsState(
-        targetValue = if (isDebit) DebitRed else CreditGreen,
+        targetValue = when (editType) {
+            TransactionType.TRANSFER -> Primary
+            TransactionType.WITHDRAWAL -> DebitRed
+            TransactionType.DEPOSIT -> CreditGreen
+        },
         animationSpec = tween(200), label = "amt_color"
     )
 
@@ -103,16 +108,16 @@ fun TransactionEditorSheet(
                     )
                 )
                 Spacer(Modifier.height(8.dp))
-                // Type toggle
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Type toggle — 3 chips matching Firefly III
+                Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     FilterChip(
-                        selected = isDebit,
+                        selected = editType == TransactionType.WITHDRAWAL,
                         onClick = {
-                            editType = TransactionType.DEBIT
-                            transaction.correctedType = TransactionType.DEBIT
+                            editType = TransactionType.WITHDRAWAL
+                            transaction.correctedType = TransactionType.WITHDRAWAL
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         },
-                        label = { Text("Withdrawal", fontWeight = FontWeight.SemiBold) },
+                        label = { Text("Expense", fontWeight = FontWeight.SemiBold) },
                         leadingIcon = { Icon(Icons.Filled.ArrowUpward, null, Modifier.size(16.dp)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = DebitRed.copy(alpha = 0.15f),
@@ -122,18 +127,34 @@ fun TransactionEditorSheet(
                         shape = RoundedCornerShape(20.dp)
                     )
                     FilterChip(
-                        selected = !isDebit,
+                        selected = editType == TransactionType.DEPOSIT,
                         onClick = {
-                            editType = TransactionType.CREDIT
-                            transaction.correctedType = TransactionType.CREDIT
+                            editType = TransactionType.DEPOSIT
+                            transaction.correctedType = TransactionType.DEPOSIT
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         },
-                        label = { Text("Deposit", fontWeight = FontWeight.SemiBold) },
+                        label = { Text("Income", fontWeight = FontWeight.SemiBold) },
                         leadingIcon = { Icon(Icons.Filled.ArrowDownward, null, Modifier.size(16.dp)) },
                         colors = FilterChipDefaults.filterChipColors(
                             selectedContainerColor = CreditGreen.copy(alpha = 0.15f),
                             selectedLabelColor = CreditGreen,
                             selectedLeadingIconColor = CreditGreen
+                        ),
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    FilterChip(
+                        selected = editType == TransactionType.TRANSFER,
+                        onClick = {
+                            editType = TransactionType.TRANSFER
+                            transaction.correctedType = TransactionType.TRANSFER
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        },
+                        label = { Text("Transfer", fontWeight = FontWeight.SemiBold) },
+                        leadingIcon = { Icon(Icons.Filled.SwapHoriz, null, Modifier.size(16.dp)) },
+                        colors = FilterChipDefaults.filterChipColors(
+                            selectedContainerColor = Primary.copy(alpha = 0.15f),
+                            selectedLabelColor = Primary,
+                            selectedLeadingIconColor = Primary
                         ),
                         shape = RoundedCornerShape(20.dp)
                     )

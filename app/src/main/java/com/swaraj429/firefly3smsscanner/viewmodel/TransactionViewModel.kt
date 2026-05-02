@@ -44,8 +44,8 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                 }
 
                 // Build transaction split with enriched metadata
-                val split = if (fireflyType == "withdrawal") {
-                    FireflyTransactionSplit(
+                val split = when (fireflyType) {
+                    "withdrawal" -> FireflyTransactionSplit(
                         type = fireflyType,
                         description = description,
                         amount = String.format(Locale.US, "%.2f", transaction.effectiveAmount),
@@ -59,8 +59,7 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                         tags = transaction.selectedTags.ifEmpty { null },
                         budgetId = transaction.budgetId
                     )
-                } else {
-                    FireflyTransactionSplit(
+                    "deposit" -> FireflyTransactionSplit(
                         type = fireflyType,
                         description = description,
                         amount = String.format(Locale.US, "%.2f", transaction.effectiveAmount),
@@ -68,6 +67,30 @@ class TransactionViewModel(application: Application) : AndroidViewModel(applicat
                         sourceName = transaction.sourceAccountName
                             ?: if (transaction.sourceAccountId == null) "SMS Income" else null,
                         destinationId = transaction.destinationAccountId ?: prefs.accountId,
+                        date = dateStr,
+                        notes = "Auto-parsed from SMS:\n${transaction.rawMessage}",
+                        categoryName = transaction.categoryName,
+                        tags = transaction.selectedTags.ifEmpty { null },
+                        budgetId = transaction.budgetId
+                    )
+                    "transfer" -> FireflyTransactionSplit(
+                        type = fireflyType,
+                        description = description,
+                        amount = String.format(Locale.US, "%.2f", transaction.effectiveAmount),
+                        sourceId = transaction.sourceAccountId ?: prefs.accountId,
+                        destinationId = transaction.destinationAccountId,
+                        date = dateStr,
+                        notes = "Auto-parsed from SMS:\n${transaction.rawMessage}",
+                        categoryName = transaction.categoryName,
+                        tags = transaction.selectedTags.ifEmpty { null },
+                        budgetId = transaction.budgetId
+                    )
+                    else -> FireflyTransactionSplit(
+                        type = "withdrawal",
+                        description = description,
+                        amount = String.format(Locale.US, "%.2f", transaction.effectiveAmount),
+                        sourceId = transaction.sourceAccountId ?: prefs.accountId,
+                        destinationName = "SMS Expense",
                         date = dateStr,
                         notes = "Auto-parsed from SMS:\n${transaction.rawMessage}",
                         categoryName = transaction.categoryName,

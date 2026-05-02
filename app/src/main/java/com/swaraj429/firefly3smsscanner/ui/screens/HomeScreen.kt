@@ -40,7 +40,7 @@ fun HomeScreen(
     val transactions = smsViewModel.parsedTransactions
     val pendingCount = transactions.count { it.status == SendStatus.PENDING }
     val todaySpend = transactions
-        .filter { it.effectiveType == TransactionType.DEBIT && it.status != SendStatus.FAILED }
+        .filter { it.effectiveType == TransactionType.WITHDRAWAL && it.status != SendStatus.FAILED }
         .sumOf { it.effectiveAmount }
 
     Column(modifier = Modifier.fillMaxSize()) {
