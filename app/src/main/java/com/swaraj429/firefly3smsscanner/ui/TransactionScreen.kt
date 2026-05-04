@@ -255,21 +255,30 @@ private fun TransactionCard(
                     verticalArrangement = Arrangement.spacedBy(2.dp)
                 ) {
                     FilterChip(
-                        selected = editType == TransactionType.DEBIT,
+                        selected = editType == TransactionType.WITHDRAWAL,
                         onClick = {
-                            editType = TransactionType.DEBIT
-                            transaction.correctedType = TransactionType.DEBIT
+                            editType = TransactionType.WITHDRAWAL
+                            transaction.correctedType = TransactionType.WITHDRAWAL
                         },
-                        label = { Text("🔴 Debit") },
+                        label = { Text("🔴 Expense") },
                         modifier = Modifier.fillMaxWidth()
                     )
                     FilterChip(
-                        selected = editType == TransactionType.CREDIT,
+                        selected = editType == TransactionType.DEPOSIT,
                         onClick = {
-                            editType = TransactionType.CREDIT
-                            transaction.correctedType = TransactionType.CREDIT
+                            editType = TransactionType.DEPOSIT
+                            transaction.correctedType = TransactionType.DEPOSIT
                         },
-                        label = { Text("🟢 Credit") },
+                        label = { Text("🟢 Income") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    FilterChip(
+                        selected = editType == TransactionType.TRANSFER,
+                        onClick = {
+                            editType = TransactionType.TRANSFER
+                            transaction.correctedType = TransactionType.TRANSFER
+                        },
+                        label = { Text("🔄 Transfer") },
                         modifier = Modifier.fillMaxWidth()
                     )
                 }

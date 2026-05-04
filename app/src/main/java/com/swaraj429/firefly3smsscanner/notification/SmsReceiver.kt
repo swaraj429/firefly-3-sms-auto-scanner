@@ -95,7 +95,7 @@ class SmsReceiver : BroadcastReceiver() {
         val type = try {
             TransactionType.valueOf(typeStr)
         } catch (e: Exception) {
-            TransactionType.UNKNOWN
+            TransactionType.WITHDRAWAL
         }
 
         DebugLog.log(TAG, "Send Now: ₹$amount $type from notification #$notifId")
